@@ -61,7 +61,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 }
 
                 if (response.data) {
-                    setAvailableTools(response.data.map(tool => tool.name));
+                    setAvailableTools(response.data.tools.map(tool => tool.name));
                 }
             } catch (error) {
                 console.error('Error fetching tools:', error);
