@@ -56,11 +56,11 @@ export const LLMProvidersModal: React.FC<LLMProvidersModalProps> = ({
         if (!selectedModelId) return;
 
         const selectedProvider = providers.find(provider =>
-            provider.models.some(model => model.modelId === selectedModelId)
+            provider.Models.some(model => model.modelId === selectedModelId)
         );
 
         if (selectedProvider) {
-            onSave(selectedProvider.name, selectedModelId);
+            onSave(selectedProvider.ID, selectedModelId);
             onClose();
         }
     };
@@ -94,7 +94,7 @@ export const LLMProvidersModal: React.FC<LLMProvidersModalProps> = ({
                         <div className="grid grid-cols-2 gap-6 p-2">
                             {providers.map((provider) => (
                                 <LLMProviderCard
-                                    key={provider.name}
+                                    key={provider.ID}
                                     provider={provider}
                                     selectedModelId={selectedModelId}
                                     onModelSelect={setSelectedModelId}

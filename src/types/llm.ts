@@ -5,8 +5,10 @@ export interface Model {
 }
 
 export interface Provider {
-    name: string;
-    models: Model[];
+    ID: string;
+    Name: string;
+    Description: string;
+    Models: Model[];
 }
 
 export interface LLMProvidersModalProps {
@@ -19,4 +21,8 @@ export interface LLMProvidersModalProps {
 
 export interface LLMProvidersResponse {
     providers: Provider[];
+    page: number;
+    per_page: number;
+    total: number;
 }
+

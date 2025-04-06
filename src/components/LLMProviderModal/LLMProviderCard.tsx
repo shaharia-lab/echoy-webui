@@ -14,9 +14,9 @@ export const LLMProviderCard: React.FC<LLMProviderCardProps> = ({
                                                                 }) => {
     return (
         <div className="bg-white shadow-sm rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">{provider.name}</h3>
+            <h3 className="text-lg font-semibold mb-3 text-gray-800">{provider.Name}</h3>
             <div className="space-y-2">
-                {provider.models.map((model) => (
+                {provider.Models.map((model) => (
                     <div
                         key={model.modelId}
                         className={`p-3 rounded-lg cursor-pointer transition-all ${
