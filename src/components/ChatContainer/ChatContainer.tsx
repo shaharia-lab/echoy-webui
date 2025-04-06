@@ -172,21 +172,27 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
             content: '',
             isUser: false
         };
+
+        // Add the empty message first
         setMessages(prev => [...prev, assistantMessage]);
 
+        // Create a reference to keep track of accumulated content
         let accumulatedContent = '';
 
         await chatService.sendStreamMessage(
             payload,
             (chunk) => {
-                if (!chunk.done) {
+                if (chunk.content || chunk.content === '') {  // Check explicitly for content
                     accumulatedContent += chunk.content;
+
+                    // Use a functional state update to ensure you're working with the latest state
                     setMessages(prev => {
                         const newMessages = [...prev];
-                        const lastMessage = newMessages[newMessages.length - 1];
-                        if (!lastMessage.isUser) {
-                            newMessages[newMessages.length - 1] = {
-                                ...lastMessage,
+                        // Make sure we're updating the last message
+                        const lastIndex = newMessages.length - 1;
+                        if (lastIndex >= 0 && !newMessages[lastIndex].isUser) {
+                            newMessages[lastIndex] = {
+                                ...newMessages[lastIndex],
                                 content: accumulatedContent
                             };
                         }
