@@ -25,9 +25,13 @@ interface StreamChunk {
     done?: boolean;
 }
 
-interface ChatHistoriesResponse {
+interface PaginatedChatHistoriesResponse {
     chats: ChatHistory[];
+    page: number;
+    per_page: number;
+    total: number;
 }
+
 
 // Updated ChatService
 export class ChatService extends APIClient {
@@ -35,8 +39,8 @@ export class ChatService extends APIClient {
         super(import.meta.env.VITE_MCP_BACKEND_API_ENDPOINT, token);
     }
 
-    async getChatHistories(): Promise<APIResponse<ChatHistoriesResponse>> {
-        return this.fetchWithError<ChatHistoriesResponse>('/api/v1/chats');
+    async getChatHistories(): Promise<APIResponse<PaginatedChatHistoriesResponse>> {
+        return this.fetchWithError<PaginatedChatHistoriesResponse>('/api/v1/chats');
     }
 
     async sendMessage(payload: ChatPayload): Promise<APIResponse<ChatResponse>> {
