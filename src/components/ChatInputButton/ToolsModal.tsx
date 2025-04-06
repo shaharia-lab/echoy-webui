@@ -20,7 +20,7 @@ export const ToolsModal: React.FC<ToolsModalProps> = ({
             try {
                 const toolService = new ToolService("");
                 const response = await toolService.getTools();
-                setTools(response.data || []);
+                setTools(response.data?.tools || []);
             } catch (error) {
                 console.error('Error fetching tools:', error);
             }

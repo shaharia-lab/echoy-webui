@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     useEffect(() => {
         loadChatHistories();
-    }, []);
+    }, [loadChatHistories]);
 
     const getFirstMessage = (chat: ChatHistory): string => {
         if (!chat.messages || chat.messages.length === 0) {

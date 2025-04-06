@@ -61,7 +61,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 }
 
                 if (response.data) {
-                    setAvailableTools(response.data.map(tool => tool.name));
+                    setAvailableTools(response.data.tools.map(tool => tool.name));
                 }
             } catch (error) {
                 console.error('Error fetching tools:', error);
@@ -147,7 +147,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 payload.chat_uuid = chatUuid;
             }
 
-
             if (config.streamResponse) {
                 await handleStreamingResponse(chatService, payload);
             } else {
@@ -167,11 +166,11 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         chatService: ChatService,
         payload: ChatPayload
     ) => {
-        // Initialize empty assistant message
         const assistantMessage: ClientChatMessage = {
             content: '',
             isUser: false
         };
+
         setMessages(prev => [...prev, assistantMessage]);
 
         let accumulatedContent = '';
@@ -179,14 +178,15 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         await chatService.sendStreamMessage(
             payload,
             (chunk) => {
-                if (!chunk.done) {
+                if (chunk.content || chunk.content === '') {
                     accumulatedContent += chunk.content;
+
                     setMessages(prev => {
                         const newMessages = [...prev];
-                        const lastMessage = newMessages[newMessages.length - 1];
-                        if (!lastMessage.isUser) {
-                            newMessages[newMessages.length - 1] = {
-                                ...lastMessage,
+                        const lastIndex = newMessages.length - 1;
+                        if (lastIndex >= 0 && !newMessages[lastIndex].isUser) {
+                            newMessages[lastIndex] = {
+                                ...newMessages[lastIndex],
                                 content: accumulatedContent
                             };
                         }

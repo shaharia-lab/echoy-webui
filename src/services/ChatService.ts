@@ -25,9 +25,13 @@ interface StreamChunk {
     done?: boolean;
 }
 
-interface ChatHistoriesResponse {
+interface PaginatedChatHistoriesResponse {
     chats: ChatHistory[];
+    page: number;
+    per_page: number;
+    total: number;
 }
+
 
 // Updated ChatService
 export class ChatService extends APIClient {
@@ -35,8 +39,8 @@ export class ChatService extends APIClient {
         super(import.meta.env.VITE_MCP_BACKEND_API_ENDPOINT, token);
     }
 
-    async getChatHistories(): Promise<APIResponse<ChatHistoriesResponse>> {
-        return this.fetchWithError<ChatHistoriesResponse>('/api/v1/chats');
+    async getChatHistories(): Promise<APIResponse<PaginatedChatHistoriesResponse>> {
+        return this.fetchWithError<PaginatedChatHistoriesResponse>('/api/v1/chats');
     }
 
     async sendMessage(payload: ChatPayload): Promise<APIResponse<ChatResponse>> {
@@ -61,20 +65,15 @@ export class ChatService extends APIClient {
                 body: JSON.stringify(payload),
             });
 
-            //const chatUuid = response.headers.get('X-Chat-Uuid');
-            // Debug: Log all available headers
-            console.log('All response headers:');
             response.headers.forEach((value, name) => {
                 console.log(`${name}: ${value}`);
             });
 
-            // Try both casing variants
             const chatUuid = response.headers.get('X-MKit-Chat-UUID');
 
             if (chatUuid && onHeaderChatUuid) {
                 onHeaderChatUuid(chatUuid);
             }
-
 
             const reader = response.body?.getReader();
             if (!reader) {
@@ -96,37 +95,37 @@ export class ChatService extends APIClient {
 
                     for (const line of lines) {
                         if (line.trim()) {
-                            try {
-                                const parsed = JSON.parse(line) as StreamChunk;
-                                onChunk(parsed);
-                                if (parsed.done) {
-                                    return; // Exit early if we receive done flag
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const jsonStr = line.substring(6);
+                                    const parsed = JSON.parse(jsonStr) as StreamChunk;
+                                    onChunk(parsed);
+                                    if (parsed.done) {
+                                        return;
+                                    }
+                                } catch (e) {
+                                    console.error('Failed to parse chunk:', e, line);
                                 }
-                            } catch (e) {
-                                console.error('Failed to parse chunk:', e);
                             }
                         }
                     }
                 }
 
-                // Handle any remaining data
-                const remaining = decoder.decode();
-                if (buffer + remaining) {
-                    const finalLine = (buffer + remaining).trim();
-                    if (finalLine) {
-                        try {
-                            const parsed = JSON.parse(finalLine) as StreamChunk;
-                            onChunk(parsed);
-                        } catch (e) {
-                            console.error('Failed to parse final chunk:', e);
-                        }
+                if (buffer.trim() && buffer.startsWith('data: ')) {
+                    try {
+                        const jsonStr = buffer.substring(6);
+                        const parsed = JSON.parse(jsonStr) as StreamChunk;
+                        onChunk(parsed);
+                    } catch (e) {
+                        console.error('Failed to parse final chunk:', e);
                     }
                 }
             } finally {
                 reader.releaseLock();
             }
         } catch (error) {
-            throw new Error(error instanceof Error ? error.message : 'Unknown error occurred');
+            console.error('Stream error:', error);
+            throw error;
         }
     }
 }
