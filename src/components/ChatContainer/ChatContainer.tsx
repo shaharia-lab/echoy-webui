@@ -147,7 +147,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 payload.chat_uuid = chatUuid;
             }
 
-
             if (config.streamResponse) {
                 await handleStreamingResponse(chatService, payload);
             } else {
@@ -167,28 +166,23 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         chatService: ChatService,
         payload: ChatPayload
     ) => {
-        // Initialize empty assistant message
         const assistantMessage: ClientChatMessage = {
             content: '',
             isUser: false
         };
 
-        // Add the empty message first
         setMessages(prev => [...prev, assistantMessage]);
 
-        // Create a reference to keep track of accumulated content
         let accumulatedContent = '';
 
         await chatService.sendStreamMessage(
             payload,
             (chunk) => {
-                if (chunk.content || chunk.content === '') {  // Check explicitly for content
+                if (chunk.content || chunk.content === '') {
                     accumulatedContent += chunk.content;
 
-                    // Use a functional state update to ensure you're working with the latest state
                     setMessages(prev => {
                         const newMessages = [...prev];
-                        // Make sure we're updating the last message
                         const lastIndex = newMessages.length - 1;
                         if (lastIndex >= 0 && !newMessages[lastIndex].isUser) {
                             newMessages[lastIndex] = {
